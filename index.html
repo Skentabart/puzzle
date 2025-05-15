@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puzzle Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 10px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.controls {
+  margin: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+#puzzle-container {
+  position: relative;
+  width: 90vw;
+  max-width: 90vmin;
+  aspect-ratio: 1 / 1;
+  margin-top: 10px;
+}
+
+.puzzle-piece {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: 1px solid #fff;
+  touch-action: none;
+}
+
+input[type="file"], select, button {
+  font-size: 1rem;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Собери Пазл</h1>
+  <div class="controls">
+    <input type="file" id="imageUpload" accept="image/*" />
+    <select id="size">
+      <option value="3">3x3</option>
+      <option value="4">4x4</option>
+      <option value="5">5x5</option>
+    </select>
+    <button id="shuffle">Перемешать</button>
+  </div>
+  <div id="puzzle-container"></div>  <script>
+    const container = document.getElementById("puzzle-container");
+    const sizeSelector = document.getElementById("size");
+    const imageInput = document.getElementById("imageUpload");
+    const shuffleButton = document.getElementById("shuffle");
+
+    let imageSrc = "https://picsum.photos/500"; // дефолтная картинка
+    let size = parseInt(sizeSelector.value);
+    let pieces = [];
+
+    sizeSelector.addEventListener("change", () => {
+      size = parseInt(sizeSelector.value);
+      createPuzzle();
+    });
+
+    imageInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          imageSrc = evt.target.result;
+          createPuzzle();
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    shuffleButton.addEventListener("click", () => {
+      pieces = shuffleArray(pieces);
+      drawPuzzle();
+    });
+
+    function createPuzzle() {
+      container.innerHTML = "";
+      pieces = [];
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          pieces.push({ x, y });
+        }
+      }
+
+      pieces = shuffleArray(pieces);
+      drawPuzzle();
+    }
+
+    function drawPuzzle() {
+      const containerSize = container.clientWidth;
+      const pieceSize = containerSize / size;
+      container.innerHTML = "";
+
+      pieces.forEach((piece, index) => {
+        const div = document.createElement("div");
+        div.classList.add("puzzle-piece");
+        div.style.width = `${pieceSize}px`;
+        div.style.height = `${pieceSize}px`;
+        div.style.left = `${(index % size) * pieceSize}px`;
+        div.style.top = `${Math.floor(index / size) * pieceSize}px`;
+        div.style.backgroundImage = `url(${imageSrc})`;
+        div.style.backgroundSize = `${containerSize}px ${containerSize}px`;
+        div.style.backgroundPosition = `-${piece.x * pieceSize}px -${piece.y * pieceSize}px`;
+
+        div.draggable = true;
+
+        div.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", index);
+        });
+
+        div.addEventListener("dragover", (e) => {
+          e.preventDefault();
+        });
+
+        div.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+          const toIndex = index;
+          [pieces[fromIndex], pieces[toIndex]] = [pieces[toIndex], pieces[fromIndex]];
+          drawPuzzle();
+          checkVictory();
+        });
+
+        container.appendChild(div);
+      });
+    }
+
+    function checkVictory() {
+      const isCorrect = pieces.every((piece, index) => {
+        const correctX = index % size;
+        const correctY = Math.floor(index / size);
+        return piece.x === correctX && piece.y === correctY;
+      });
+
+      if (isCorrect) {
+        setTimeout(() => alert("Победа! Пазл собран правильно!"), 100);
+      }
+    }
+
+    function shuffleArray(array) {
+      const shuffled = array.slice();
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    createPuzzle();
+  </script></body>
+</html>

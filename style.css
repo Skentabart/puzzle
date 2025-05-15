@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.container {
+  width: 100%;
+  max-width: 90vmin;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+#puzzle-container {
+  position: relative;
+  width: 90vw;         /* Адаптивная ширина */
+  max-width: 600px;
+  height: 90vw;        /* Точно такая же, как ширина */
+  max-height: 600px;
+  margin: auto;
+  border: 2px solid #000;
+  touch-action: none;  /* Отключает прокрутку при drag на сенсоре */
+}
+
+.puzzle-piece {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  background-size: 100% 100%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
